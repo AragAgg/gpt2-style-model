@@ -79,6 +79,8 @@ def main(config_path):
         n_head=model_config['n_head'],
         bos_token_id=tokenizer.bos_token_id,
         eos_token_id=tokenizer.eos_token_id,
+        use_rms_norm=True,
+        rms_norm_eps=1e-08,
     )
 
     # 4. Instantiate the model
@@ -97,6 +99,7 @@ def main(config_path):
     trainer = Trainer(
         model=model,
         args=training_args,
+        tokenizer=tokenizer,
         data_collator=data_collator,
         train_dataset=train_dataset,
         eval_dataset=eval_dataset,

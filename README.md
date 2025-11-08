@@ -10,6 +10,7 @@ gpt2-style-model/
 │   ├── full_training_config.yaml
 │   └── test_pipeline_config.yaml
 ├── gpt2-overfit-test/
+├── inference.py
 ├── train_tokenizer.py
 ├── train.py
 ├── requirements.txt
@@ -18,6 +19,7 @@ gpt2-style-model/
 ```
 
 -   `configs/`: Contains YAML configuration files for training.
+-   `inference.py`: Script to run inference with a trained model.
 -   `train_tokenizer.py`: Script to train a BPE tokenizer on the WikiText-103 dataset.
 -   `train.py`: Script to train the GPT-2 style model.
 -   `requirements.txt`: Python dependencies.
@@ -76,8 +78,10 @@ To train the model, use the `train.py` script with a configuration file.
 It's recommended to run a small test to make sure the training pipeline is working correctly. This will train a small model on a tiny subset of the data to check for overfitting.
 
 ```bash
-accelerate launch train.py --config configs/test_pipeline_config.yaml
+accelerate launch --config_file configs/accelerate_config.yaml train.py --config configs/test_pipeline_config.yaml
 ```
+
+This command uses the `test_pipeline_config.yaml` to configure the model and training parameters for a small-scale run.
 
 This should result in a very low validation loss after a few epochs, indicating that the model is able to memorize the small dataset.
 
@@ -90,6 +94,23 @@ accelerate launch train.py --config configs/full_training_config.yaml
 ```
 
 This will train a larger model on the entire dataset. Training progress is logged to Weights & Biases.
+
+### 3. Run Inference
+
+To generate text with the trained model, use the `inference.py` script.
+
+```bash
+python inference.py --model_path ./gpt2-wikitext-full-final --prompt "Once upon a time"
+```
+
+You can customize the generation parameters:
+
+-   `--model_path`: Path to the saved model directory.
+-   `--prompt`: The text prompt to start generation from.
+-   `--max_length`: Maximum length of the generated text.
+-   `--temperature`: Controls randomness.
+-   `--top_k`: Top-K filtering.
+-   `--top_p`: Nucleus sampling.
 
 ## Configuration
 

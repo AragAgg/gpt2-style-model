@@ -1,7 +1,12 @@
+# This project requires Miniconda or Anaconda for environment management.
+# Please install it before proceeding.
+
 torch
 transformers
 datasets
 tokenizers
 pyyaml
 wandb
+pytest
+hf_transfer
 accelerate

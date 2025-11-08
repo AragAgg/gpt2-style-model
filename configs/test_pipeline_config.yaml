@@ -22,19 +22,24 @@ training:
   output_dir: "./gpt2-overfit-test"
   run_name: "gpt2-overfit-test"
   overwrite_output_dir: true
-  learning_rate: 0.00005
-  num_train_epochs: 100 # High number of epochs to force overfit
+  learning_rate: 0.0001
+  max_grad_norm: 1.0
+  weight_decay: 0.1
+  num_train_epochs: 1000 # High number of epochs to force overfit
   per_device_train_batch_size: 5
   per_device_eval_batch_size: 5
-  eval_steps: 4      # Evaluate every epoch (20 samples / 5 batch_size = 4 steps)
-  save_steps: 40     # Save every 10 epochs
+  eval_steps: 20      # Evaluate every epoch (20 samples / 5 batch_size = 4 steps)
+  save_steps: 200000     # Save every 10 epochs
   warmup_steps: 10
   do_eval: true
   logging_dir: './logs-overfit'
-  logging_steps: 1 # Log every step to see loss plummet
+  logging_steps: 20 # Log every step to see loss plummet
   report_to: "wandb"
 
 # Tokenizer configuration
 tokenizer:
   vocab_file: "./wikitext-tokenizer-vocab.json"
   merges_file: "./wikitext-tokenizer-merges.txt"
+
+environment_variables:
+  HF_HUB_ENABLE_HF_TRANSFER: 0
