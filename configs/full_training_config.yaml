@@ -1,0 +1,35 @@
+# Dataset configuration
+dataset:
+  name: "wikitext"
+  config_name: "wikitext-103-raw-v1"
+  block_size: 512
+  num_proc: 4
+  use_subset: false
+
+# Model configuration
+model:
+  n_positions: 512
+  n_embd: 768
+  n_layer: 12
+  n_head: 12
+
+# Training configuration
+training:
+  output_dir: "./gpt2-wikitext-full"
+  run_name: "gpt2-full-training"
+  overwrite_output_dir: true
+  learning_rate: 0.00005
+  num_train_epochs: 1
+  per_device_train_batch_size: 8 # Lowered for common GPU memory
+  per_device_eval_batch_size: 8
+  eval_steps: 500
+  save_steps: 1000
+  warmup_steps: 500
+  do_eval: true
+  logging_dir: './logs-full'
+  report_to: "wandb"
+
+# Tokenizer configuration
+tokenizer:
+  vocab_file: "./wikitext-tokenizer-vocab.json"
+  merges_file: "./wikitext-tokenizer-merges.txt"
