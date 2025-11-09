@@ -38,8 +38,8 @@ training:
 
 # Tokenizer configuration
 tokenizer:
-  vocab_file: "./wikitext-tokenizer-vocab.json"
-  merges_file: "./wikitext-tokenizer-merges.txt"
+  vocab_file: "./gpt2-tokenizer-vocab.json"
+  merges_file: "./gpt2-tokenizer-merges.txt"
 
 environment_variables:
   HF_HUB_ENABLE_HF_TRANSFER: 0

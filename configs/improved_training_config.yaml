@@ -1,0 +1,82 @@
+# Dataset configuration for improved_train.py
+dataset:
+  tokens_per_epoch: 20000000000  # 20 billion tokens per epoch
+  cache_dir: "./dataset_cache"  # Cache directory for downloaded data (persistent across epochs)
+  shuffle_buffer_size: 10000  # Buffer size for shuffling streaming data
+
+# Model configuration - 1B parameter model optimized for H100
+model:
+  n_positions: 4096  # 4K context for better long-range understanding
+  n_embd: 2048  # Wide model for better capacity
+  n_layer: 22  # 22 layers = ~1.1B parameters with n_embd=2048
+  n_head: 16  # 16 heads = 128 dims per head (2048/16)
+  resid_pdrop: 0.1  # Residual dropout for regularization
+  embd_pdrop: 0.05  # Lower embedding dropout to preserve input information
+  attn_pdrop: 0.1  # Attention dropout
+
+# Profiler configuration
+profiler:
+  enabled: true  # Enable PyTorch profiler
+  profile_steps: 15     # Total steps to profile (warmup + active)
+  warmup_steps: 5       # Warmup steps before profiling begins
+  active_steps: 10      # Active profiling steps. Must be > 0 for schedule. -1 is not supported.
+
+# Training configuration - Optimized for 4x H100 GPUs (80GB each)
+training:
+  output_dir: "./model/run1/checkpoints"  # This will be overridden by the script
+  run_name: "gpt2-1b-refinedweb-training"
+  overwrite_output_dir: true
+  
+  # Learning rate with cosine decay schedule
+  learning_rate: 6.0e-4  # Peak LR for 1B model (higher than 124M due to larger capacity)
+  lr_scheduler_type: "cosine"  # Cosine decay for smooth convergence
+  warmup_steps: 2000  # Longer warmup for 1B model stability
+  
+  # Training duration
+  num_train_epochs: 3
+  
+  # Batch configuration for 4x H100 (total batch size = 16 * 4 GPUs * 4 accum = 256 samples = 1.05M tokens/batch)
+  per_device_train_batch_size: 16  # Optimized for H100 with gradient checkpointing
+  per_device_eval_batch_size: 16
+  gradient_accumulation_steps: 4  # Effective batch = 256 samples across 4 GPUs
+  
+  # Precision and performance
+  bf16: true  # BFloat16 for H100 - native support, faster than FP16
+  bf16_full_eval: true  # Use bf16 for eval too
+  torch_compile: true  # PyTorch 2.0 compile for ~20-30% speedup on H100
+  dataloader_num_workers: 8  # More workers for H100 to prevent data bottleneck
+  dataloader_pin_memory: true  # Pin memory for faster GPU transfer
+  
+  # Evaluation and checkpointing
+  eval_steps: 500
+  save_steps: 1000  # More frequent saves for 1B model
+  logging_steps: 50  # More frequent logging
+  eval_strategy: "steps"  # Fixed: was evaluation_strategy in older transformers versions
+  save_strategy: "steps"
+  save_total_limit: 5  # Keep more checkpoints for 1B model
+  load_best_model_at_end: false  # Disable to save memory
+  
+  # Optimizer configuration
+  optim: "adamw_torch_fused"  # Fused AdamW for H100 - faster than standard AdamW
+  adam_beta1: 0.9
+  adam_beta2: 0.95  # Standard for LLMs
+  adam_epsilon: 1.0e-8
+  weight_decay: 0.1  # Strong regularization for 1B model
+  max_grad_norm: 1.0  # Gradient clipping for stability
+  
+  # Logging
+  logging_dir: './logs'
+  report_to: ["tensorboard", "wandb"]
+  logging_first_step: true
+  
+  # Memory optimizations
+  gradient_checkpointing: true  # Essential for 4096 context with 1B model
+  gradient_checkpointing_kwargs: {"use_reentrant": false}  # Better memory efficiency
+  
+  # Distributed training settings (for accelerate with 4 GPUs)
+  ddp_find_unused_parameters: false  # Faster DDP
+  ddp_bucket_cap_mb: 25  # Optimized for H100 interconnect
+
+environment_variables:
+  HF_HUB_ENABLE_HF_TRANSFER: 1
+

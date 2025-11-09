@@ -7,3 +7,7 @@ gpt2-wikitext-full/
 gpt2-overfit-test/
 gpt2-overfit-test-final/
 wandb/
+model/
+dataset_cache/
+gpt2-tokenizer-vocab.json
+gpt2-tokenizer-merges.txt
