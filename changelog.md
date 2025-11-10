@@ -17,3 +17,10 @@
 - Fixed evaluation_strategy parameter to eval_strategy in improved_training_config.yaml for compatibility with newer transformers versions.
 - Added logic to improved_train.py to automatically calculate `max_steps` for streaming datasets, fixing ValueError with learning rate scheduler.
 - Fixed profiler error by setting default `profile_steps` in config and correcting profiler stop logic in `improved_train.py`.
+- Improved inference.py with command-line arguments, better generation parameters, and cleaner output.
+- Fixed attention mask warning in inference.py by explicitly passing the attention mask.
+- Refactored inference.py to add generate_response() function with configurable max_new_tokens parameter.
+- Added eval.py automated evaluation script for batch testing with customizable question sets and token limits.
+- Created example_questions.json and example_questions.csv as templates for evaluation input formats.
+- Updated eval.py to automatically extract run name (e.g., run15) and checkpoint name from model path, saves results to run directory with descriptive filename.
+- Modified eval.py to save results in a new format: `eval_{benchmark_name}.csv` inside a `<checkpoint_folder>/evals/` directory and made `--benchmark_name` a required argument.

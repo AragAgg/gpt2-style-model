@@ -8,24 +8,41 @@ This project contains a GPT-2 style transformer model trained on the WikiText-10
 gpt2-style-model/
 ├── configs/
 │   ├── full_training_config.yaml
+│   ├── improved_training_config.yaml
+│   ├── accelerate_config.yaml
 │   └── test_pipeline_config.yaml
-├── gpt2-overfit-test/
+├── model/
+│   └── runN/
+│       ├── checkpoints/
+│       ├── final/
+│       ├── tensorboard/
+│       └── profiler/
 ├── inference.py
+├── eval.py
+├── example_questions.json
+├── example_questions.csv
 ├── train_tokenizer.py
+├── improved_train_tokeniser.py
 ├── train.py
+├── improved_train.py
+├── verify_setup.py
 ├── requirements.txt
 ├── gpt2-tokenizer-merges.txt
 └── gpt2-tokenizer-vocab.json
 ```
 
 -   `configs/`: Contains YAML configuration files for training.
--   `inference.py`: Script to run inference with a trained model.
+-   `model/`: Output directory for trained models and training artifacts.
+-   `inference.py`: Script to run interactive chat inference with a trained model.
+-   `eval.py`: Automated evaluation script for batch testing with question sets.
+-   `example_questions.json`, `example_questions.csv`: Example question file templates for evaluation.
 -   `train_tokenizer.py`: Script to train a BPE tokenizer on the WikiText-103 dataset.
 -   `improved_train_tokeniser.py`: Script to download and setup the default GPT-2 BPE tokenizer.
 -   `train.py`: Script to train the GPT-2 style model.
+-   `improved_train.py`: Advanced training script with streaming, caching, and profiling.
+-   `verify_setup.py`: Automated setup verification script.
 -   `requirements.txt`: Python dependencies.
 -   `gpt2-tokenizer-merges.txt`, `gpt2-tokenizer-vocab.json`: GPT-2 pretrained tokenizer files (original GPT-2 embeddings).
--   `gpt2-overfit-test/`: Directory where the overfit test model is saved.
 
 ## Getting Started
 
@@ -168,10 +185,17 @@ This will train a larger model on the entire dataset. Training progress is logge
 To generate text with the trained model, use the `inference.py` script.
 
 ```bash
-python inference.py --model_path ./gpt2-wikitext-full-final --prompt "Once upon a time"
+python inference.py --model_path ./model/run1/final
 ```
 
-You can customize the generation parameters:
+You can also use a specific checkpoint:
+```bash
+python inference.py --model_path ./model/run1/checkpoints/checkpoint-4000
+```
+
+The script will load the model and start an interactive chat session.
+
+You can customize the generation parameters by editing the `inference.py` script:
 
 -   `--model_path`: Path to the saved model directory.
 -   `--prompt`: The text prompt to start generation from.
@@ -179,6 +203,91 @@ You can customize the generation parameters:
 -   `--temperature`: Controls randomness.
 -   `--top_k`: Top-K filtering.
 -   `--top_p`: Nucleus sampling.
+
+### 4. Run Automated Evaluation
+
+The `eval.py` script allows you to run batch evaluations on your model with a predefined set of questions. Results are saved to a CSV file with the model's responses.
+
+#### Prepare Your Questions
+
+Create a question file in either JSON or CSV format:
+
+**JSON Format** (`my_questions.json`):
+```json
+[
+    {
+        "question": "What is the capital of France?",
+        "max_tokens": 50
+    },
+    {
+        "question": "Explain quantum computing in simple terms.",
+        "max_tokens": 100
+    }
+]
+```
+
+**CSV Format** (`my_questions.csv`):
+```csv
+question,max_tokens
+"What is the capital of France?",50
+"Explain quantum computing in simple terms.",100
+```
+
+Example question files (`example_questions.json` and `example_questions.csv`) are provided in the repository.
+
+#### Run Evaluation
+
+```bash
+python eval.py --model_path ./model/run1/final --questions my_questions.json --benchmark_name my_benchmark
+```
+
+Or with a specific checkpoint:
+```bash
+python eval.py --model_path ./model/run15/checkpoints/checkpoint-4000 --questions my_questions.csv --benchmark_name another_benchmark
+```
+
+#### Customize Generation Parameters
+
+```bash
+python eval.py \
+  --model_path ./model/run1/final \
+  --questions my_questions.json \
+  --benchmark_name custom_benchmark \
+  --temperature 0.8 \
+  --top_p 0.95 \
+  --repetition_penalty 1.3 \
+  --output_dir ./custom_evaluation_results
+```
+
+#### Evaluation Script Options
+
+-   `--model_path`: Path to the model checkpoint directory (required)
+-   `--questions`: Path to questions file (JSON or CSV format) (required)
+-   `--benchmark_name`: Required name for the benchmark run, used in output filename
+-   `--output_dir`: Directory to save results (default: `<model_path>/evals/`)
+-   `--temperature`: Sampling temperature (default: 1.0)
+-   `--repetition_penalty`: Repetition penalty (default: 1.2)
+-   `--top_k`: Top-k sampling parameter (default: 50)
+-   `--top_p`: Top-p (nucleus) sampling parameter (default: 0.9)
+
+#### Output Format
+
+Results are saved to a CSV file with the following naming convention:
+```
+eval_{benchmark_name}.csv
+```
+
+For example:
+```
+eval_my_benchmark.csv
+```
+
+The run name and checkpoint name are no longer included in the filename, but the results are saved by default to the checkpoint's `evals/` subfolder (e.g., `model/run15/checkpoints/checkpoint-4000/evals/`).
+
+The CSV contains three columns:
+-   `question`: The input question
+-   `max_tokens`: Maximum tokens allowed for the response
+-   `response`: The model's generated response
 
 ## Configuration
 

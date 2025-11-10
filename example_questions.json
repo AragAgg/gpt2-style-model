@@ -1,0 +1,23 @@
+[
+    {
+        "question": "What is the capital of France?",
+        "max_tokens": 50
+    },
+    {
+        "question": "Explain quantum computing in simple terms.",
+        "max_tokens": 100
+    },
+    {
+        "question": "Write a short poem about coding.",
+        "max_tokens": 75
+    },
+    {
+        "question": "What are the benefits of machine learning?",
+        "max_tokens": 80
+    },
+    {
+        "question": "How does a neural network work?",
+        "max_tokens": 120
+    }
+]
+
